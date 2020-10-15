@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+	<div align="center" style="margin-top: 200px">
+		<h1>로그인</h1>
+		<table>
+			<tr>
+				<td>
+				<input type="text" id="_id" placeholder="아이디">
+				</td>
+			</tr>
+			<tr>
+				<td>
+				<input type="text" id="_pwd" placeholder="비밀번호">
+				</td>
+			</tr>
+			<tr>
+				<td align="center">
+				<button type="button" id="_login">로그인</button>
+					<button type="button" id="_addmem">회원가입</button>
+			    </td>
+			</tr>
+		</table>
+	</div>
+
+	<script type="text/javascript">
+  $("#_login").click(function(){
+	  let id = $("#_id").val();
+	  let pwd = $("#_pwd").val();
+	  if( id == "" || pwd == ""){
+		  alert("모두 입력해주세요");
+	  }
+	  else{
+		  $.ajax({
+			 url:"http://localhost:3000/login",
+			 type:"get",
+			 data:{"id": id, "pwd": pwd},
+			 success:function( lodto ){
+				 if( lodto != ""){
+					 alert("로그인 성공");
+
+					 //세션저장
+					 sessionStorage.setItem("login", JSON.stringify(lodto));
+
+					 let login = JSON.parse(sessionStorage.getItem("login"));
+
+					// alert(login.id );
+					// alert(login.name);
+
+					// location.href = "bbslist.html";
+					location.href = "bbslistTeacher.html";
+				 }else{
+					 alert("아이디나 비밀번호를 다시한번 확인해주세요");
+				 }
+			 },
+			 error:function(){
+				 alert("error");
+			 }
+
+		  });
+
+	  }
+  });
+
+  $("#_addmem").click(function(){
+	  location.href = "regi.html";
+  })
+
+</script>
+
+</body>
+</html>

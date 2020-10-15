@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+  <script type="text/javascript">
+
+  let urlParams = location.search.split(/[?&]/).slice(1).map(function(paramPair) {
+      return paramPair.split(/=(.+)?/).slice(0, 2);
+  }).reduce(function(obj, pairArray) {
+      obj[pairArray[0]] = pairArray[1];
+      return obj;
+  }, {});
+
+  </script>
+  <form id="frm">
+<div align="center">
+  <table>
+     <tr>
+       <td>
+         아이디
+       </td>
+
+       <td>
+         <input type="text" name="id" id="id" readonly="readonly" />
+       </td>
+     </tr>
+
+     <tr>
+       <td>
+         제목
+       </td>
+       <td>
+         <input type="text" name="title" id="title" placeholder="제목" />
+       </td>
+     </tr>
+
+     <tr>
+       <td>
+         내용
+       </td>
+       <td>
+         <textarea row="5" col="10" placeholder="내용" name="content" id="content"></textarea>
+       </td>
+     </tr>
+  </table>
+
+  <br />
+  <button type="button" id="BbsWrite">글작성</button>
+  </div>
+</form>
+
+<script>
+$(document).ready(function(){
+     let login = JSON.parse(sessionStorage.getItem("login"));
+     let id = login.id;
+  //   alert(login.id);
+     $("#id").val(id);
+
+});
+$("#BbsWrite").click(function(){
+  var params = $("#frm").serialize();
+     if($("#title").val() == ""){
+       alert("제목을 입력해주세요");
+     }
+     else if($("#content").val() == ""){
+         alert("내용을 입력해주세요");
+     }
+     else{
+      // alert($("#id").val());
+       $.ajax({
+         url:"http://localhost:3000/bbsWrite",
+         type:"post",
+         data:params,
+         datatype:"json",
+         success:function( ){
+       alert("글이 등록되었습니다");
+       location.href = "bbslist.html";
+         },
+         error:function(){
+           alert("error");
+         }
+       })
+     }
+});
+
+</script>
+</body>
+</html>

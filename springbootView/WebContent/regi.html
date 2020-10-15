@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+  <form id="frm">
+	<div align="center" style="margin-top: 200px">
+		<h1>회원가입</h1>
+		<table>
+			<tr>
+				<td>
+				  <input type="text" id="_id" name="id" placeholder="아이디">
+				  <button type="button" id="_idCheck">중복체크</button>
+				</td>
+			</tr>
+			<tr>
+				<td>
+				  <input type="text" id="_pwd" name="pwd" placeholder="비밀번호">
+				 </td>
+			</tr>
+			<tr>
+				<td>
+				 <input type="text" id="_email" name="email" placeholder="이메일">
+				 </td>
+			</tr>
+			<tr>
+				<td>
+				 <input type="text" id="_name" name="name" placeholder="이름">
+				 </td>
+			</tr>
+			<tr>
+				<td align="center">
+					<button type="button" id="_addmem">회원가입</button>
+				</td>
+			</tr>
+		</table>
+	</div>
+	</form>
+	<script type="text/javascript">
+	     let id = "";
+	  $("#_idCheck").click(function(){
+		   id = $("#_id").val();
+		  if( id == ""){
+			  alert("아이디를 입력해주세요");
+		  }else{
+			  $.ajax({
+				  url:"http://localhost:3000/idCheck",
+			      type:"get",
+			      data:{"id": id},
+			      success:function(a){
+			    	  if(a == "used"){
+			    		  alert("사용중인 아이디입니다");
+			    		  $("#_id").val("");
+			    	  }else{
+			    		  alert("사용가능한 아이디입니다");
+			    	  }
+			      },
+			      error:function(){
+			    	  alert("error");
+			      }
+			  });
+		  }
+
+	  });
+
+$("#_addmem").click(function(){
+	if($("#_id").val() == ""){
+		alert("아이디를 입력해주세요");
+		$("#_id").focus();
+	}
+	else if($("#_pwd").val() == ""){
+		alert("비밀번호를 입력해주세요");
+		$("#_pwd").focus();
+	}
+	else if($("#_name").val() == ""){
+		alert("이름을 입력해주세요");
+		$("#_name").focus();
+	}
+	else if($("#_email").val() == ""){
+		alert("이메일을 입력해주세요");
+		$("#_email").focus();
+	}
+	else if(id != $("#_id").val()){
+		alert("중복체크를 해주세요");
+		$("#_id").focus();
+	}
+	else{
+
+	var params = $("#frm").serialize();
+
+
+
+		$.ajax({
+			url:"http://localhost:3000/addMember",
+			type:"post",
+			data:params,
+      datatype:"json",
+			async:true,
+			success:function(){
+				alert("회원가입에 성공했습니다");
+				location.href = "login.html";
+			},
+			error:function(){
+				alert("error");
+			}
+		});
+	}
+});
+
+// form을 통해 한번에 보내기
+$("#_addmemForm").click(function(){
+	if($("#_id").val() == ""){
+		alert("아이디를 입력해주세요");
+		$("#_id").focus();
+	}
+	else if($("#_pwd").val() == ""){
+		alert("비밀번호를 입력해주세요");
+		$("#_pwd").focus();
+	}
+	else if($("#_name").val() == ""){
+		alert("이름을 입력해주세요");
+		$("#_name").focus();
+	}
+	else if($("#_email").val() == ""){
+		alert("이메일을 입력해주세요");
+		$("#_email").focus();
+	}
+	else if(id != $("#_id").val()){
+		alert("중복체크를 해주세요");
+		$("#_id").focus();
+	}
+	else{
+
+	var params = $("#frm").serialize();
+
+		$.ajax({
+			url:"http://localhost:3000/addMember",
+			type:"post",
+			data:params,
+			async:true,
+			success:function(){
+				alert("회원가입에 성공했습니다");
+				location.href = "login.html";
+			},
+			error:function(){
+				alert("error");
+			}
+		});
+	}
+});
+	</script>
+
+</body>
+</html>

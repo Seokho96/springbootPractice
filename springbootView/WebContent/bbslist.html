@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="jquery/jquery.twbsPagination.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<style type="text/css">
+/* td{
+  text-align: left;
+} */
+
+</style>
+</head>
+<body>
+
+
+<a href="#none" onclick="logout()" style="text-decoration: none">로그아웃</a>
+
+<div id="bbsList">
+<div align="center">
+  <select id="_s_category">
+    <option value="all">전체</option>
+    <option value="title">제목</option>
+    <option value="content">내용</option>
+    <option value="w_id">작성자</option>
+  </select>
+  <input type="text" id="_keyword" placeholder="검색">
+  <button type="button" id="_search">검색</button>
+  <a href="bbswrite.html">글쓰기</a>
+</div>
+
+<div align="center" style="margin-top: 100px">
+   <h1>게시판</h1>
+  <table border="1">
+     <colgroup>
+	<col style="width:70px">
+	<col style="width:200px">
+	<col style="width:100px">
+	<col style="width:70px">
+</colgroup>
+    <thead>
+	<tr>
+		<th>번호</th><th>제목</th><th>작성자</th><th></th>
+	</tr>
+</thead>
+ <tbody id="_bbslist">
+
+ </tbody>
+
+  </table>
+<br><br>
+</div>
+
+<!-- paging -->
+<div class="container">
+	<nav aria-label="Page navigation">
+		<ul class="pagination" id="pagination" style="justify-content: center;"></ul>
+	</nav>
+</div>
+</div>
+
+<div id="bbsType">
+
+</div>
+<script type="text/javascript">
+
+	  bbs(0);
+	  getBbsListCount();
+
+
+
+  $("#_search").click(function(){
+
+	      bbs(0);
+	      getBbsListCount();
+  });
+  function goList(){
+	  $("#bbsList").show();
+	  $("#bbsType").hide();
+	  bbs(0);
+	  getBbsListCount();
+  }
+
+  function logout() {
+
+	  $.ajax({
+		 url:"http://localhost:3000/logout",
+		 type:"get",
+		 success:function(){
+			 alert("로그아웃 되었습니다");
+			 location.href = "login.html";
+		 },
+		 error:function(){
+			 alert("error");
+		 }
+
+	  });
+}
+
+  function bbs( pNumber ){
+
+	  $.ajax({
+		  url:"http://localhost:3000/getBbsList",
+		  type:"get",
+		  data:{"pageNumber":pNumber, "recordCountPerPage":10, "s_category":$("#_s_category option:selected").val(), "keyword":$("#_keyword").val()},
+		  success:function( list ){
+			  let r = "";
+			  $.each(list, function(i, bbs){
+				  let n = i + 1;
+				  r += "<tr>"
+				        +"<td style='text-align:center'>" + n + "</td>"
+				        +"<td><a href='#none' onclick='bbsDetail("+bbs.seq+")' style='text-decoration:none'>" + bbs.title + "</a></td>"
+				        +"<td style='text-align:center'>" + bbs.id + "</td>" + "<td style='text align: center'><a href='#none' onclick='deleteBbs("+ bbs.seq +")' style='text-decoration:none; color:red'>삭제</a></td>"
+				        +"</tr>";
+
+				});
+			  $("#_bbslist").html(r);
+		  },
+		  error:function(){
+			  alert("error");
+		  }
+
+	  })
+  }
+//글의 총수를 취득
+  function getBbsListCount(){
+  	$.ajax({
+  		url:"http://localhost:3000/bbsListCount",
+  		type:"get",
+  		data:{ "pageNumber":0, "recordCountPerPage":10,
+  				"s_category":$("#_s_category").val(), "keyword":$("#_keyword").val() },
+  		success:function( count ){
+  		//	alert("success");
+  		//	alert(count);
+  			loadPage(count);
+  		},
+  		error:function(){
+  			alert("error");
+  		}
+  	});
+  }
+
+//paging 처리
+  function loadPage( totalCount ){
+
+  	let pageSize = 10;
+  	let nowPage = 1;
+
+  	let totalPages = totalCount / pageSize;
+  	if(totalCount % pageSize > 0){
+  		totalPages++;
+  	}
+
+  	$("#pagination").twbsPagination('destroy');	// 페이지 갱신
+
+  	$("#pagination").twbsPagination({
+  	//	startPage: 1,
+  		totalPages: totalPages,		// 전체 페이지 수
+  		visiblePages: 10,
+  		first:'<span aria-hidden="true">«</span>',
+  		prev:"이전",
+  		next:"다음",
+  		last:'<span aria-hidden="true">»</span>',
+  		initiateStartPageClick:false,		// onPageClick 자동 실행하지 않는다
+  		onPageClick: function(event, page){
+  			nowPage = page;
+  		//	alert('nowPage:' + nowPage);
+  			bbs( nowPage - 1 );
+  		}
+  	});
+  }
+
+  function deleteBbs( seq ){
+	  let ch = confirm("삭제하시겠습니까?");
+	  if(ch){
+		  $.ajax({
+				 url:"http://localhost:3000/bbsDelete",
+				 type:"post",
+				 data:{"seq":seq},
+				 success:function(){
+					 alert("삭제되었습니다");
+					 goList();
+				 },
+				 error:function(){
+					 alert("error");
+				 }
+
+			  });
+	  }else{
+
+	  }
+
+
+  }
+
+  function bbsDetail(seq){
+	  location.href = "bbsdetail.html?seq="+seq;
+	}
+
+  function updateBbs(seq){
+	  $("#bbsType").show();
+	    $("#bbsList").hide();
+		$.ajax({
+			url:"http://localhost:3000/bbsDetail",
+			type:"get",
+			data:{"seq":seq},
+			success:function( detail ){
+				let a = "";
+					a += "<div align='center' style='margin-top: 100px'>"
+					      +"<h1>게시판 수정하기</h1>"
+					      +"<form id='frm'>"
+				          + "<table border='1'>"
+				          +"<colgroup>"
+	                      +    "<col style='width:200px;' />"
+	                      +    "<col style='width:auto;' />"
+	                      + "</colgroup>"
+	                      +  "<tbody>"
+	                      +   "<tr>"
+	                      +    "<th>작성자</th>"
+	                      +    "<td>"+ detail.id +"<input type='hidden' value='"+ detail.seq +"' id='seq' name='seq'></td>"
+	                      +   "</tr>"
+	                      +   "<tr>"
+	                      +    "<th>제목</th>"
+	                      +    "<td><input type='text' id='title' value='"+  detail.title  +"'  name='title'></td>"
+	                      +   "</tr>"
+	                      +   "<tr>"
+	                      +     "<th>내용</th>"
+	                      +      "<td><textarea row='5' col='10' id='content' name='content'>"+ detail.content +"</textarea></td>"
+	                      +    "</tr>"
+	                      +  "</tbody>"
+	                      +  "</table>"
+	                      +"</form>"
+	                      +"<br><br>"
+	                      +"<a href='#none' onclick='bbsDetail("+ detail.seq +")' style='text-decoration:none;'>글로 돌아가기</a>&nbsp; &nbsp;"
+	                      +"<a href='#none' onclick='updateBbsAf()' style='text-decoration:none;'>수정하기</a>";
+
+	             $("#bbsType").html(a);
+			},
+			error:function(){
+				alert("error");
+			}
+		});
+	}
+
+  function updateBbsAf(){
+
+	  var params = $("#frm").serialize;
+
+	  let title = $("#title").val();
+	  let content = $("#content").val();
+	  let seq = $("#seq").val();
+
+	  if(title == ""){
+		  alert("제목을 입력해주새요");
+	  }
+	  else if(content == ""){
+		  alert("내용을 입력해주새요");
+	  }else{
+		  $.ajax({
+			 url:"http://localhost:3000/bbsUpdate",
+			 type:"post",
+			 data:{"seq":seq, "title":title, "content":content},
+			 success:function( i ){
+				 if(i == "yes"){
+					 alert("수정 성공!");
+					 bbsDetail(seq);
+				 }
+			 },
+			 error:function(){
+				 alert("error");
+			 }
+
+		  });
+
+	  }
+
+  }
+</script>
+
+
+</body>
+</html>
